@@ -19,29 +19,69 @@ public class Solver {
      * Initiates the solver's parameter based on the input arguments
      * */
     private static void initiateSolver(String arguments){
-        // Read the initial state from file/console
-        // Give values to the parameters
+        inputType = "input.txt";
+        printWholeSequence = true;
+        printCostOfTheSolution = true;
+        heuristicsType = 1;
+        sizeOfRandomState = 3;
+        numberOfPushings = 4;
+        startNode = new Puzzle(3);
+        startNode.setContent(createDummyData());
+        goalNode = new Puzzle(3);
+        goalNode.setContent(createGoalNode());
     }
 
+    private static ArrayList<Integer> createGoalNode(){
+        ArrayList <Integer> data = new ArrayList<>();
+        for(int i=0; i<createDummyData().size(); ++i){
+            data.add(i);
+        }
+        return data;
+    }
+    private static ArrayList<Integer> createDummyData(){
+        ArrayList <Integer> datas = new ArrayList<>();
+        datas.add(2);
+        datas.add(3);
+        datas.add(5);
+        datas.add(8);
+        datas.add(0);
+        datas.add(1);
+        datas.add(7);
+        datas.add(6);
+        datas.add(4);
+        return datas;
+    }
     /**
      * Solves the puzzle
      * */
     public static Puzzle solvePuzzle(String arguments){
         initiateSolver(arguments);
-        ArrayList<Puzzle> openList = new ArrayList<>();
-        ArrayList<Puzzle> closedList = new ArrayList<>();
+        openList = new ArrayList<>();
+        closedList = new ArrayList<>();
         openList.add(startNode);
+        startNode.print();
+
         while(openList.size() != 0 ){
             Puzzle node = getNodeWithLowestOptimalCost(openList);
             closedList.add(node);
             if(node == goalNode) return node;
+            printSuccessors(node.getSuccessors());
             for(Puzzle successor: node.getSuccessors()){
+                successor.print();
                 successor.prepare(node, heuristicsType);
                 removeOccurencesFromLists(openList,closedList,successor);
             }
         }
 
         return null;
+    }
+
+    private static void printSuccessors(ArrayList<Puzzle> successors) {
+        for(int i=0; i<successors.size(); ++i){
+            System.out.println("SUCCESSOR " + i + ": ");
+            successors.get(i).print();
+        }
+
     }
 
     /**
@@ -63,13 +103,25 @@ public class Solver {
      * Returns the element from a given list which has the lowest optimal cost.
      * */
     private static Puzzle getNodeWithLowestOptimalCost(ArrayList<Puzzle> list){
-        return null;
+        int index =0, optimalCost = 1000;
+        for(int i=0; i<list.size(); ++i){
+            if(list.get(i).getOptimalCost() < optimalCost){
+                optimalCost = list.get(i).getOptimalCost();
+                index = i;
+            }
+        }
+        return list.get(index);
     }
 
     /**
      * Returns the list element if it is identical with the parameter, null otherwise.
      * */
     private static Puzzle findElementInTheList(ArrayList<Puzzle> list, Puzzle nodeToFind){
+        for(Puzzle puzzle: list){
+            if(puzzle == nodeToFind){
+                return puzzle;
+            }
+        }
         return null;
     }
 
@@ -77,5 +129,10 @@ public class Solver {
      * Removes given element from a given list.
      * */
     private static void removeFromList(ArrayList<Puzzle> list, Puzzle nodeToFind){
+        for(int i=0; i<list.size(); ++i){
+            if(list.get(i).isEqual(nodeToFind)){
+                list.remove(i);
+            }
+        }
     }
 }

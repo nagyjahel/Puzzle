@@ -17,8 +17,8 @@ public class Solver {
 
     /**
      * Initiates the solver's parameter based on the input arguments
-     * */
-    private static void initiateSolver(String arguments){
+     */
+    private static void initiateSolver(String arguments) {
         inputType = "input.txt";
         printWholeSequence = true;
         printCostOfTheSolution = true;
@@ -29,17 +29,27 @@ public class Solver {
         startNode.setContent(createDummyData());
         goalNode = new Puzzle(3);
         goalNode.setContent(createGoalNode());
+        openList = new ArrayList<>();
+        closedList = new ArrayList<>();
+
     }
 
-    private static ArrayList<Integer> createGoalNode(){
-        ArrayList <Integer> data = new ArrayList<>();
-        for(int i=0; i<createDummyData().size(); ++i){
+    /**
+     * Defines the goal node
+     * */
+    private static ArrayList<Integer> createGoalNode() {
+        ArrayList<Integer> data = new ArrayList<>();
+        for (int i = 0; i < createDummyData().size(); ++i) {
             data.add(i);
         }
         return data;
     }
-    private static ArrayList<Integer> createDummyData(){
-        ArrayList <Integer> datas = new ArrayList<>();
+
+    /**
+     * Helper function (may be deleted) - creates dummy data
+     * */
+    private static ArrayList<Integer> createDummyData() {
+        ArrayList<Integer> datas = new ArrayList<>();
         datas.add(2);
         datas.add(3);
         datas.add(5);
@@ -51,88 +61,140 @@ public class Solver {
         datas.add(4);
         return datas;
     }
+
     /**
      * Solves the puzzle
-     * */
-    public static Puzzle solvePuzzle(String arguments){
+     */
+    public static Puzzle solvePuzzle(String arguments) {
         initiateSolver(arguments);
-        openList = new ArrayList<>();
-        closedList = new ArrayList<>();
         openList.add(startNode);
-        startNode.print();
+        startNode.prepare(null, heuristicsType);
 
-        while(openList.size() != 0 ){
-            Puzzle node = getNodeWithLowestOptimalCost(openList);
+        while (areNotVisitedNodes()) {
+            Puzzle node = getNodeWithLowestOptimalCost();
+            node.visit();
             closedList.add(node);
-            if(node == goalNode) return node;
-            printSuccessors(node.getSuccessors());
-            for(Puzzle successor: node.getSuccessors()){
-                successor.print();
+            if (node.isEqual(goalNode)) return node;
+            for (Puzzle successor : node.getSuccessors()) {
                 successor.prepare(node, heuristicsType);
-                removeOccurencesFromLists(openList,closedList,successor);
+                removeOccurencesFromLists(successor);
             }
         }
 
         return null;
     }
 
+    /**
+     * Helper function (may be deleted) - prints all the successors of a node
+     * */
     private static void printSuccessors(ArrayList<Puzzle> successors) {
-        for(int i=0; i<successors.size(); ++i){
+        for (int i = 0; i < successors.size(); ++i) {
             System.out.println("SUCCESSOR " + i + ": ");
             successors.get(i).print();
         }
 
     }
 
-    /**
-     * Removes the actual element from the open and the closed list, and adds it to the open one if needed.
-     * */
-    private static void removeOccurencesFromLists(ArrayList<Puzzle> openList, ArrayList<Puzzle> closedList, Puzzle successor){
-        Puzzle theSameFromTheOpenList = findElementInTheList(openList,successor);
-        if(theSameFromTheOpenList != null && theSameFromTheOpenList.getOptimalCost()> successor.getOptimalCost()){
-            removeFromList(openList,theSameFromTheOpenList);
-            openList.add(successor);
-        }
-        Puzzle theSameFromTheClosedList = findElementInTheList(closedList,successor);
-        if(theSameFromTheClosedList != null && theSameFromTheClosedList.getOptimalCost()> successor.getOptimalCost()){
-            removeFromList(closedList,theSameFromTheOpenList);
-        }
-    }
-
-    /**
-     * Returns the element from a given list which has the lowest optimal cost.
-     * */
-    private static Puzzle getNodeWithLowestOptimalCost(ArrayList<Puzzle> list){
-        int index =0, optimalCost = 1000;
-        for(int i=0; i<list.size(); ++i){
-            if(list.get(i).getOptimalCost() < optimalCost){
-                optimalCost = list.get(i).getOptimalCost();
-                index = i;
+    private static boolean areNotVisitedNodes(){
+        for(Puzzle puzzle: openList){
+            if(!puzzle.isVisited()){
+                return true;
             }
         }
-        return list.get(index);
+        return false;
+    }
+    /**
+     * Removes the actual element from the open and the closed list, and adds it to the open one if needed.
+     */
+    private static void removeOccurencesFromLists(Puzzle successor) {
+        Puzzle theSameFromTheOpenedList = findElementInList(openList, successor);
+        if (theSameFromTheOpenedList != null) {
+            if (theSameFromTheOpenedList.getOptimalCost() > successor.getOptimalCost()) {
+                removeFromList(openList, theSameFromTheOpenedList);
+                addToList(openList, successor);
+            }
+        } else {
+            addToList(openList, successor);
+        }
+
+        Puzzle theSameFromTheClosedList = findElementInList(closedList, successor);
+        if (theSameFromTheClosedList != null) {
+            if (theSameFromTheClosedList.getOptimalCost() > successor.getOptimalCost()) {
+                removeFromList(closedList, theSameFromTheClosedList);
+            }
+        }
+
     }
 
     /**
-     * Returns the list element if it is identical with the parameter, null otherwise.
+     * Removes a defined element from a given list
      * */
-    private static Puzzle findElementInTheList(ArrayList<Puzzle> list, Puzzle nodeToFind){
-        for(Puzzle puzzle: list){
-            if(puzzle == nodeToFind){
+    private static void removeFromList(ArrayList<Puzzle> list, Puzzle puzzleToRemove) {
+        for (int i = 0; i < list.size(); ++i) {
+            if (list.get(i).isIdentical(puzzleToRemove)) {
+                list.remove(i);
+            }
+        }
+    }
+
+    /**
+     * Prints a list
+     * */
+    private static void printList(ArrayList<Puzzle> list, int listType){
+        if(listType == 0) {
+            System.out.println("OPEN LIST ");
+        }
+        else {
+            System.out.println("CLOSE LIST ");
+
+        }
+            for(Puzzle puzzle: list){
+                puzzle.print();
+            }
+            System.out.println("--------------------------------------------");
+
+    }
+
+    /**
+     * Adds an element to a list in case that element doesn't is part of that list yet
+     * */
+    private static void addToList(ArrayList<Puzzle> list, Puzzle puzzleToAdd) {
+        for (Puzzle puzzle : list) {
+            if (puzzle.isIdentical(puzzleToAdd)) {
+                return;
+            }
+        }
+        list.add(puzzleToAdd);
+    }
+
+
+    /**
+     * Finds a the equal pair of an element in a list
+     * */
+    private static Puzzle findElementInList(ArrayList<Puzzle> list, Puzzle puzzleToFind) {
+        for (Puzzle puzzle : list) {
+            if (puzzle.isEqual(puzzleToFind) && !puzzle.isIdentical(puzzleToFind)) {
                 return puzzle;
             }
         }
         return null;
     }
 
+
     /**
-     * Removes given element from a given list.
-     * */
-    private static void removeFromList(ArrayList<Puzzle> list, Puzzle nodeToFind){
-        for(int i=0; i<list.size(); ++i){
-            if(list.get(i).isEqual(nodeToFind)){
-                list.remove(i);
+     * Returns the element from a given list which has the lowest optimal cost.
+     */
+    private static Puzzle getNodeWithLowestOptimalCost() {
+        int index = 0, optimalCost = 1000;
+        for (int i = 0; i < openList.size(); ++i) {
+            if (openList.get(i).getOptimalCost() < optimalCost && !openList.get(i).isVisited()) {
+                optimalCost = openList.get(i).getOptimalCost();
+                index = i;
             }
         }
+        return openList.get(index);
     }
+
+
+
 }

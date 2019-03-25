@@ -31,5 +31,9 @@ public class Main {
         if(solution == null){
             System.out.println("No solution");
         }
+        else{
+            System.out.println("Solution");
+            solution.print();
+        }
     }
 }

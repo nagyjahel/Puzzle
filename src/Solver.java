@@ -4,6 +4,7 @@ import Models.Puzzle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.Scanner;
 
 class Solver {
 
@@ -49,6 +50,12 @@ class Solver {
             }
         }
 
+        if(inputType.equals("")){
+            readInitialNode();
+        }
+        else{
+            // readFromFile
+        }
         startNode = new Puzzle(3);
         startNode.setContent(createDummyData());
         goalNode = new Puzzle(3);
@@ -56,6 +63,23 @@ class Solver {
         openList = new ArrayList<>();
         closedList = new ArrayList<>();
 
+    }
+    /**
+     * Read initial state from standard input
+     */
+    private static ArrayList<Integer> readInitialNode(){
+        Scanner Cin = new Scanner(System.in);
+        System.out.print("Size of the puzzle: ");
+        int size = Cin.nextInt();
+        ArrayList<Integer> data = new ArrayList<>(size);
+        System.out.println("Puzzle state:");
+        for(int i = 0; i < size; ++i){
+            for(int j = 0; j < size; ++j){
+                int value = Cin.nextInt();
+                data.add(value);
+            }
+        }
+        return data;
     }
 
     /**

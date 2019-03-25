@@ -24,7 +24,7 @@ class Solver {
     private static Puzzle goalNode;
     private static int[][] content;
     private static int currentX, currentY;
-
+    private static int puzzleSize = 3;
     private static int totalCost = 0;
     private static int numberOfVisitedNodes = 0;
 
@@ -47,7 +47,10 @@ class Solver {
                 printCostOfTheSolution = true;
             }
             if(argumentList[i].equals("-rand")){
+
                 sizeOfRandomState = Integer.parseInt(argumentList[i+1]);
+                startNode = new Puzzle(sizeOfRandomState);
+                startNode.setContent(createRandomInitialState());
                 numberOfPushings = Integer.parseInt(argumentList[i+2]);
             }
 
@@ -55,18 +58,16 @@ class Solver {
                 printVisitedNodeNumber = true;
             }
         }
+        if(sizeOfRandomState == 0) {
+            if (inputType.equals("")) {
+                readInitialNode();
+            } else {
+                createInitialStateFromFile();
+            }
+        }
 
-        if(inputType.equals("")){
-            readInitialNode();
-        }
-        else{
-            // readFromFile
-        }
-        startNode = new Puzzle(3);
-        startNode.setContent(createDummyData());
-        //startNode.setContent(createRandomInitialState());
-        //startNode.setContent(createInitialStateFromFile());
-        goalNode = new Puzzle(3);
+        startNode.print();
+        goalNode = new Puzzle(puzzleSize);
         goalNode.setContent(createGoalNode());
         openList = new ArrayList<>();
         closedList = new ArrayList<>();
@@ -78,15 +79,17 @@ class Solver {
     private static ArrayList<Integer> readInitialNode(){
         Scanner Cin = new Scanner(System.in);
         System.out.print("Size of the puzzle: ");
-        int size = Cin.nextInt();
-        ArrayList<Integer> data = new ArrayList<>(size);
+        puzzleSize = Cin.nextInt();
+        startNode = new Puzzle(puzzleSize);
+        ArrayList<Integer> data = new ArrayList<>(puzzleSize);
         System.out.println("Puzzle state:");
-        for(int i = 0; i < size; ++i){
-            for(int j = 0; j < size; ++j){
+        for(int i = 0; i < puzzleSize; ++i){
+            for(int j = 0; j < puzzleSize; ++j){
                 int value = Cin.nextInt();
                 data.add(value);
             }
         }
+        startNode.setContent(data);
         return data;
     }
 
@@ -127,10 +130,11 @@ class Solver {
         try{
 
             Scanner scanner = new Scanner(new File(inputType));
-            int size = scanner.nextInt();
-            data = new ArrayList<>(size);
-            for(int i = 0; i < size; ++i){
-                for(int j = 0; j < size; ++j){
+            puzzleSize = scanner.nextInt();
+            startNode = new Puzzle(puzzleSize);
+            data = new ArrayList<>(puzzleSize);
+            for(int i = 0; i < puzzleSize; ++i){
+                for(int j = 0; j < puzzleSize; ++j){
                     data.add(scanner.nextInt());
                 }
             }
@@ -143,6 +147,8 @@ class Solver {
         {
             System.out.println(ex.getMessage());
         }
+        startNode.setContent(data);
+
         return data;
     }
     /**

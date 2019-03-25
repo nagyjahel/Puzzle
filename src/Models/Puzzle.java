@@ -16,6 +16,9 @@ public class Puzzle {
     /**
      * Constructor of the puzzle entity
      * */
+    public Puzzle(){
+
+    }
     public Puzzle(int size){
         this.size = size;
         this.content = new int[size][size];
@@ -235,4 +238,7 @@ public class Puzzle {
         return (isEqual(nodeToFind) && this.cost == nodeToFind.cost && this.optimalCost == nodeToFind.optimalCost && this.estimatedCost == nodeToFind.estimatedCost);
     }
 
+    public void setSize(int size) {
+        this.size = size;
+    }
 }

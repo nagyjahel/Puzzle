@@ -188,6 +188,11 @@ public class Puzzle {
         for(int i=0; i<size; ++i){
             for(int j=0; j<size; ++j){
                 System.out.print(content[i][j] + " ");
+                if(content[i][j]< 10){
+                    System.out.print(" ");
+
+                }
+
             }
             System.out.println();
         }

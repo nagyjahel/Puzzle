@@ -2,13 +2,15 @@ import Models.Coordinate;
 import Models.Puzzle;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 class Solver {
 
-    private static String inputType;
-    private static boolean printWholeSequence;
-    private static boolean printCostOfTheSolution;
+    private static String inputType = "";
+    private static boolean printWholeSequence = false;
+    private static boolean printCostOfTheSolution = true;
+    private static boolean printVisitedNodeNumber = false;
     private static int heuristicsType;
     private static int sizeOfRandomState;
     private static int numberOfPushings;
@@ -17,17 +19,36 @@ class Solver {
     private static Puzzle startNode;
     private static Puzzle goalNode;
     private static int[][] content;
-
+    private static int totalCost = 0;
+    private static int numberOfVisitedNodes = 0;
     /**
      * Initiates the solver's parameter based on the input arguments
      */
     private static void initiateSolver(String arguments) {
-        inputType = "input.txt";
-        printWholeSequence = true;
-        printCostOfTheSolution = true;
-        heuristicsType = 1;
-        sizeOfRandomState = 3;
-        numberOfPushings = 4;
+        String[] argumentList = arguments.split(" ");
+        for(int i=0; i< argumentList.length; ++i){
+            if(argumentList[i].equals("-input")){
+                inputType = argumentList[i+1];
+            }
+            if(argumentList[i].equals("-h")){
+                heuristicsType = Integer.parseInt(argumentList[i+1]);
+            }
+            if(argumentList[i].equals("-solseq")){
+                printWholeSequence = true;
+            }
+            if(argumentList[i].equals("-pcost")){
+                printCostOfTheSolution = true;
+            }
+            if(argumentList[i].equals("-rand")){
+                sizeOfRandomState = Integer.parseInt(argumentList[i+1]);
+                numberOfPushings = Integer.parseInt(argumentList[i+2]);
+            }
+
+            if(argumentList[i].equals("-nvisited")){
+                printVisitedNodeNumber = true;
+            }
+        }
+
         startNode = new Puzzle(3);
         startNode.setContent(createDummyData());
         goalNode = new Puzzle(3);
@@ -53,15 +74,18 @@ class Solver {
      * */
     private static ArrayList<Integer> createDummyData() {
         ArrayList<Integer> datas = new ArrayList<>();
-        datas.add(0);
+
         datas.add(1);
         datas.add(2);
+        datas.add(0);
         datas.add(3);
         datas.add(4);
         datas.add(5);
         datas.add(6);
         datas.add(7);
         datas.add(8);
+
+
         return datas;
     }
 
@@ -193,35 +217,26 @@ class Solver {
         Puzzle lastNode = startNode;
 
         while (areNotVisitedNodes()) {
-
+            if(printWholeSequence) lastNode.print();
             lastNode.visit();
-            lastNode.print();
+            totalCost += lastNode.getOptimalCost();
+            numberOfVisitedNodes ++;
             closedList.add(lastNode);
-            if (lastNode.isEqual(goalNode)) return lastNode;
+            if (lastNode.isEqual(goalNode)) {
+                if(printCostOfTheSolution) System.out.println("Total cost: " + totalCost);
+                if(printVisitedNodeNumber) System.out.println("Number of visited nodes: " + numberOfVisitedNodes);
+                    return lastNode;
+            }
             for (Puzzle successor : lastNode.getSuccessors()) {
                 successor.prepare(lastNode, heuristicsType);
                 removeOccurencesFromLists(successor);
             }
             Puzzle node = getNodeWithLowestOptimalCost(lastNode);
-            if(node == null){
-                System.out.println("No solution");
-                return null;
-            }
+            if(node == null) return null;
             lastNode = node;
         }
 
         return null;
-    }
-
-    /**
-     * Helper function (may be deleted) - prints all the successors of a node
-     * */
-    private static void printSuccessors(ArrayList<Puzzle> successors) {
-        for (int i = 0; i < successors.size(); ++i) {
-            System.out.println("SUCCESSOR " + i + ": ");
-            successors.get(i).print();
-        }
-
     }
 
     private static boolean areNotVisitedNodes(){

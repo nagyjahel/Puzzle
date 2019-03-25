@@ -2,10 +2,6 @@
 We have a grid with different numbers and a single empty position.
 Our scope is to resolve this puzzle by placing every element on its corresponding position.
 
-### Examples ###
-A possible state of the puzzle may be, where the "-" indicates the empty positions.
-A puzzle with three rows and columns is being considered solved if looks as follows:
-
 ### Inputs ###
 1. –input <FILE>: indicates the file the initial state can be read from. If it's missing, the initial state will be read from the console.
 2. –solseq: the program will write the whole sequence of the solution on the standard output

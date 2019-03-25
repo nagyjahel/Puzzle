@@ -10,11 +10,11 @@ public class Main {
     private static String getArguments(){
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         //try {
-            String arguments = null; //reader.readLine();
+        String arguments = null; //reader.readLine();
 
-          //  return arguments;
+        //  return arguments;
         //} catch (IOException e) {
-          //  e.printStackTrace();
+        //  e.printStackTrace();
         //}
         return null;
     }

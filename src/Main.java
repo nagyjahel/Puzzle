@@ -11,13 +11,6 @@ public class Main {
      * */
     private static String getArguments(){
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        //try {
-        String arguments = null; //reader.readLine();
-
-        //  return arguments;
-        //} catch (IOException e) {
-        //  e.printStackTrace();
-        //}
         try {
             String arguments = reader.readLine();
             return arguments;

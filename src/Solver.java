@@ -63,9 +63,9 @@ class Solver {
             // readFromFile
         }
         startNode = new Puzzle(3);
-        //startNode.setContent(createDummyData());
+        startNode.setContent(createDummyData());
         //startNode.setContent(createRandomInitialState());
-        startNode.setContent(createInitialStateFromFile());
+        //startNode.setContent(createInitialStateFromFile());
         goalNode = new Puzzle(3);
         goalNode.setContent(createGoalNode());
         openList = new ArrayList<>();
@@ -106,7 +106,6 @@ class Solver {
      * */
     private static ArrayList<Integer> createDummyData() {
         ArrayList<Integer> datas = new ArrayList<>();
-
         datas.add(1);
         datas.add(2);
         datas.add(0);
@@ -116,8 +115,6 @@ class Solver {
         datas.add(6);
         datas.add(7);
         datas.add(8);
-
-
         return datas;
     }
 
@@ -285,12 +282,9 @@ class Solver {
             numberOfVisitedNodes ++;
             closedList.add(lastNode);
             if (lastNode.isEqual(goalNode)) {
-
-                return lastNode;
-
                 if(printCostOfTheSolution) System.out.println("Total cost: " + totalCost);
                 if(printVisitedNodeNumber) System.out.println("Number of visited nodes: " + numberOfVisitedNodes);
-                    return lastNode;
+                return lastNode;
 
             }
             for (Puzzle successor : lastNode.getSuccessors()) {

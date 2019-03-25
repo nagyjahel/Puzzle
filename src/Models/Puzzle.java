@@ -4,14 +4,14 @@ import java.util.ArrayList;
 
 public class Puzzle {
 
-    int size;
-    int [][] content;
-    int cost;
-    int estimatedCost;
-    int optimalCost;
-    boolean isVisited = false;
+    private int size;
+    private int [][] content;
+    private int cost;
+    private int estimatedCost;
+    private int optimalCost;
+    private boolean isVisited = false;
 
-    Puzzle parent;
+    private Puzzle parent;
 
     /**
      * Constructor of the puzzle entity
@@ -22,10 +22,15 @@ public class Puzzle {
     }
 
     public Puzzle(Puzzle original){
+        this.parent = original;
+        this.isVisited = false;
+        this.estimatedCost = 0;
+        this.cost = 0;
+        this.optimalCost = 0;
         this.size= original.size;
         this.content = new int[size][size];
         for(int i=0; i<size; ++i){
-            for (int j=0; j<size; ++j){
+            for (int j=0; j<size; ++j) {
                 content[i][j] = original.content[i][j];
             }
         }
@@ -39,10 +44,14 @@ public class Puzzle {
         isVisited = true;
     }
 
+    public Puzzle getParent() {
+        return parent;
+    }
+
     /**
      * Sets another puzzle as the parent of the current one
      * */
-    public void setParent(Puzzle node) {
+    private void setParent(Puzzle node) {
         this.parent = node;
     }
 
@@ -88,7 +97,7 @@ public class Puzzle {
     /**
      * Invokes the corresponding heuristics-calculated function based on the given parameter
      * */
-    public void estimateDistanceHeuristically(int mode){
+    private void estimateDistanceHeuristically(int mode){
         if(mode == 1){
             simpleHeuristics();
         }
@@ -115,7 +124,7 @@ public class Puzzle {
         int number = 0;
         for(int i=0; i<size; ++i){
             for(int j=0; j<size; ++j){
-                if(content[i][j] != i+j){
+                if(content[i][j] != i * size + j){
                     number ++;
                 }
             }
@@ -134,7 +143,7 @@ public class Puzzle {
     /**
      * Calculates the cost g(n') = g(n) + getCostToParent()
      * */
-    public void calculateCost() {
+    private void calculateCost() {
         if(parent != null){
             cost = parent.cost + getCostToParent();
         }
@@ -154,7 +163,7 @@ public class Puzzle {
     /**
      * Calculates the optimal cost f(n') = g(n) + h(n)
      * */
-    public void calculateOptimalCost() {
+    private void calculateOptimalCost() {
         optimalCost =  estimatedCost + cost;
     }
 
@@ -206,7 +215,7 @@ public class Puzzle {
     public boolean isEqual(Puzzle nodeToFind) {
         for(int i=0; i<size; ++i){
             for (int j=0; j<size; ++j){
-                if(content[i][j] != nodeToFind.content[i][j]){
+                if(this.content[i][j] != nodeToFind.content[i][j]){
                     return false;
                 }
             }
@@ -220,13 +229,5 @@ public class Puzzle {
     public boolean isIdentical(Puzzle nodeToFind){
         return (isEqual(nodeToFind) && this.cost == nodeToFind.cost && this.optimalCost == nodeToFind.optimalCost && this.estimatedCost == nodeToFind.estimatedCost);
     }
-    private class Coordinate{
-        int x;
-        int y;
 
-        public Coordinate(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-    }
 }

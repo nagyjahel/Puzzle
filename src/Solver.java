@@ -1,8 +1,10 @@
+import Models.Coordinate;
 import Models.Puzzle;
 
 import java.util.ArrayList;
+import java.util.Random;
 
-public class Solver {
+class Solver {
 
     private static String inputType;
     private static boolean printWholeSequence;
@@ -14,6 +16,7 @@ public class Solver {
     private static ArrayList<Puzzle> closedList;
     private static Puzzle startNode;
     private static Puzzle goalNode;
+    private static int[][] content;
 
     /**
      * Initiates the solver's parameter based on the input arguments
@@ -50,35 +53,161 @@ public class Solver {
      * */
     private static ArrayList<Integer> createDummyData() {
         ArrayList<Integer> datas = new ArrayList<>();
-        datas.add(2);
-        datas.add(3);
-        datas.add(5);
-        datas.add(8);
         datas.add(0);
         datas.add(1);
-        datas.add(7);
-        datas.add(6);
+        datas.add(2);
+        datas.add(3);
         datas.add(4);
+        datas.add(5);
+        datas.add(6);
+        datas.add(7);
+        datas.add(8);
         return datas;
+    }
+
+    /**
+     * Defines random initial state
+     */
+    private static ArrayList<Integer> createRandomInitialState(){
+        content = createInitialContent(sizeOfRandomState);
+        ArrayList<Integer> data;
+        int currentX = 0, currentY = 0;
+        for(int i = 0; i < numberOfPushings; ++i){
+            getRandomPushDirection(currentX, currentY);
+            printContent(content, sizeOfRandomState);
+        }
+        data = createList(content, sizeOfRandomState);
+        return data;
+    }
+
+    /**
+     * Random pushDirection
+     */
+    private static int[][] getRandomPushDirection(int currentX, int currentY){
+        Random r = new Random();
+        int pushDirection = r.nextInt((numberOfPushings - 1) + 1);
+        System.out.println("Random direction: " + pushDirection);
+        switch(pushDirection){
+            case 0:
+                //up
+                if(currentY > 0){
+                    currentY--;
+                    switchElementsInContent(new Coordinate(currentX, currentY), new Coordinate(currentX, currentY+1), content);
+                    printContent(content, sizeOfRandomState);
+                }
+                else{
+                    getRandomPushDirection(currentX, currentY);
+                }
+                break;
+            case 1:
+                //right
+                if(currentX < sizeOfRandomState) {
+                    currentX++;
+                    switchElementsInContent(new Coordinate(currentX, currentY), new Coordinate(currentX-1, currentY+1), content);
+                }
+                else{
+                    getRandomPushDirection(currentX, currentY);
+                }
+                break;
+            case 2:
+                //down
+                if(currentY < sizeOfRandomState){
+                    currentY++;
+                    switchElementsInContent(new Coordinate(currentX, currentY), new Coordinate(currentX, currentY-1), content);
+                }
+                else{
+                    getRandomPushDirection(currentX, currentY);
+                }
+                break;
+            case 3:
+                //left
+                if(currentX > 0){
+                    currentX--;
+                    switchElementsInContent(new Coordinate(currentX, currentY), new Coordinate(currentX+1, currentY+1), content);
+                }
+                else{
+                    getRandomPushDirection(currentX, currentY);
+                }
+                break;
+        }
+        return null;
+    }
+
+    /**
+     * Swithes two values in the initial node
+     */
+    private static void switchElementsInContent(Coordinate first, Coordinate second, int[][] randomContent){
+        Integer aux = randomContent[first.getX()][first.getY()];
+        randomContent[first.getX()][first.getY()] = randomContent[second.getX()][second.getY()];
+        randomContent[second.getX()][second.getY()] = aux;
+    }
+
+    /**
+     * Print the content
+     */
+    private static void printContent(int[][] content, int size){
+        for(int i = 0; i < size; ++i){
+            for(int j = 0; j < size; ++j){
+                System.out.print(content[i][j] + " ");
+            }
+            System.out.println();
+        }
+        System.out.println();
+    }
+
+    /**
+     * Defines the initial content for int[][]
+     */
+    private static int[][] createInitialContent(int size){
+        content = new int[size][size];
+        int[][] data = new int[size][size];
+        int value = 0;
+        for (int i = 0; i < size; ++i) {
+            for(int j = 0; j < size; ++j){
+                data[i][j] = value++;
+            }
+        }
+        return data;
+    }
+
+    /**
+     * Set list
+     */
+    private static ArrayList<Integer> createList(int[][] content, int size){
+        ArrayList<Integer> data = new ArrayList<>(size);
+        for(int i = 0; i < size; ++i){
+            for(int j = 0; j < size; ++j){
+                data.add(content[i][j]);
+            }
+        }
+        return data;
     }
 
     /**
      * Solves the puzzle
      */
-    public static Puzzle solvePuzzle(String arguments) {
+    static Puzzle solvePuzzle(String arguments) {
         initiateSolver(arguments);
         openList.add(startNode);
         startNode.prepare(null, heuristicsType);
+        Puzzle lastNode = startNode;
 
         while (areNotVisitedNodes()) {
-            Puzzle node = getNodeWithLowestOptimalCost();
-            node.visit();
-            closedList.add(node);
-            if (node.isEqual(goalNode)) return node;
-            for (Puzzle successor : node.getSuccessors()) {
-                successor.prepare(node, heuristicsType);
+
+            lastNode.visit();
+            lastNode.print();
+            closedList.add(lastNode);
+            if (lastNode.isEqual(goalNode)) return lastNode;
+            for (Puzzle successor : lastNode.getSuccessors()) {
+                successor.prepare(lastNode, heuristicsType);
                 removeOccurencesFromLists(successor);
             }
+            Puzzle node = getNodeWithLowestOptimalCost(lastNode);
+            if(node == null){
+                System.out.println("No solution");
+                return null;
+            }
+            lastNode = node;
         }
 
         return null;
@@ -133,6 +262,7 @@ public class Solver {
         for (int i = 0; i < list.size(); ++i) {
             if (list.get(i).isIdentical(puzzleToRemove)) {
                 list.remove(i);
+                break;
             }
         }
     }
@@ -184,14 +314,16 @@ public class Solver {
     /**
      * Returns the element from a given list which has the lowest optimal cost.
      */
-    private static Puzzle getNodeWithLowestOptimalCost() {
-        int index = 0, optimalCost = 1000;
+    private static Puzzle getNodeWithLowestOptimalCost(Puzzle parentNode) {
+
+        int index = -1, optimalCost = 1000;
         for (int i = 0; i < openList.size(); ++i) {
-            if (openList.get(i).getOptimalCost() < optimalCost && !openList.get(i).isVisited()) {
+            if (openList.get(i).getOptimalCost() <= optimalCost && !openList.get(i).isVisited() && openList.get(i).getParent() != null && parentNode.isEqual(openList.get(i).getParent())) {
                 optimalCost = openList.get(i).getOptimalCost();
                 index = i;
             }
         }
+        if(index == -1) return null;
         return openList.get(index);
     }
 
